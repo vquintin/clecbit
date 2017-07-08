@@ -1,6 +1,7 @@
 module Lib
     ( someFunc
     ) where
+import Control.Arrow ((&&&))
 import qualified Data.Dates as D (DateTime)
 import qualified Data.Ratio as R (Ratio)
 import qualified Data.Map as M
@@ -24,6 +25,19 @@ data XMLMatch = XMLMatch
   , matchName :: String
   , bets :: XMLBets
   }
+
+instance HXT.XmlPickler XMLMatch where
+  xpickle = xpMatch
+
+xpMatch :: HXT.PU XMLMatch
+xpMatch =
+  HXT.xpElem "match" $
+  HXT.xpWrap ( HXT.uncurry3 XMLMatch
+             , \t -> (startDate t, matchName t, bets t)
+             ) $
+  HXT.xpTriple undefined
+               (HXT.xpAttr "name" HXT.xpText)
+               HXT.xpickle
 
 newtype XMLBets = XMLBets
   { betMap :: M.Map Int XMLBet
@@ -66,7 +80,7 @@ xpMap tag =
 
 data XMLChoice = XMLChoice
   { choiceName :: String
-  , choiceOdd :: R.Ratio Int
+  , choiceOdd :: Double
   }
 
 instance HXT.XmlPickler XMLChoice where
@@ -75,8 +89,6 @@ instance HXT.XmlPickler XMLChoice where
 xpChoice :: HXT.PU XMLChoice
 xpChoice =
   HXT.xpElem "choice" $
-  HXT.xpWrap ( uncurry XMLChoice
-         , \t -> (choiceName t, choiceOdd t)
-         ) $
+  HXT.xpWrap ( uncurry XMLChoice, choiceName &&& choiceOdd) $
   HXT.xpPair (HXT.xpAttr "name" HXT.xpText)
              (HXT.xpAttr "odd"  HXT.xpPrim)
