@@ -31,6 +31,27 @@ data XMLBet = XMLBet
   , choices :: M.Map Int XMLChoice
   }
 
+instance HXT.XmlPickler XMLBet where
+  xpickle = xpBet
+
+xpBet :: HXT.PU XMLBet
+xpBet =
+  HXT.xpElem "bet" $
+  HXT.xpWrap ( HXT.uncurry3 XMLBet
+             , \t -> (betCode t, betName t, choices t)
+             ) $
+  HXT.xpTriple (HXT.xpAttr "code" HXT.xpText)
+               (HXT.xpAttr "name" HXT.xpText)
+               (xpMap "choice")
+
+
+xpMap :: (HXT.XmlPickler a) => String -> HXT.PU (M.Map Int a)
+xpMap tag =
+  HXT.xpWrap (M.fromList, M.toList) $
+  HXT.xpList $
+  HXT.xpElem tag $
+  HXT.xpPair ( HXT.xpAttr "id" HXT.xpPrim) HXT.xpickle
+
 data XMLChoice = XMLChoice
   { choiceName :: String
   , choiceOdd :: R.Ratio Int
