@@ -1,5 +1,6 @@
 module Lib
     ( someFunc
+    , xpSports
     ) where
 import Control.Arrow ((&&&))
 import qualified Data.Ratio as R (Ratio)
@@ -13,7 +14,7 @@ someFunc = putStrLn "someFunc"
 data XMLSports = XMLSports
   { fileDate :: T.UTCTime
   , sports :: M.Map Int XMLSport
-  }
+  } deriving (Eq, Show)
 
 instance HXT.XmlPickler XMLSports where
   xpickle = xpSports
@@ -28,7 +29,7 @@ xpSports =
 data XMLSport = XMLSport
   { sportName :: String
   , events :: M.Map Int XMLEvent
-  }
+  } deriving (Eq, Show)
 
 instance HXT.XmlPickler XMLSport where
   xpickle = xpSport
@@ -42,7 +43,7 @@ xpSport =
 
 newtype XMLEvent = XMLEvent
   { matches :: M.Map Int XMLMatch
-  }
+  } deriving (Eq, Show)
 
 instance HXT.XmlPickler XMLEvent where
   xpickle = xpEvent
@@ -57,7 +58,7 @@ data XMLMatch = XMLMatch
   { startDate :: T.UTCTime
   , matchName :: String
   , bets :: XMLBets
-  }
+  } deriving (Eq, Show)
 
 instance HXT.XmlPickler XMLMatch where
   xpickle = xpMatch
@@ -86,7 +87,7 @@ xpUTCTime timeZone format =
 
 newtype XMLBets = XMLBets
   { betMap :: M.Map Int XMLBet
-  }
+  } deriving (Eq, Show)
 
 instance HXT.XmlPickler XMLBets where
   xpickle = xpBets
@@ -100,7 +101,7 @@ data XMLBet = XMLBet
   { betCode :: String
   , betName :: String
   , choices :: M.Map Int XMLChoice
-  }
+  } deriving (Eq, Show)
 
 instance HXT.XmlPickler XMLBet where
   xpickle = xpBet
@@ -126,7 +127,7 @@ xpMap tag =
 data XMLChoice = XMLChoice
   { choiceName :: String
   , choiceOdd :: Double
-  }
+  } deriving (Eq, Show)
 
 instance HXT.XmlPickler XMLChoice where
   xpickle = xpChoice

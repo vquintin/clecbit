@@ -1,0 +1,15 @@
+<sports file_date="2017-07-07T21:55:17.403">
+  <sport name="Football" id="1">
+    <event name="Eng. Premier League" id="3">
+      <match name="Arsenal - Leicester" id="1429761" start_date="2017-08-11T19:45:00" live_id="" streaming="0">
+        <bets>
+          <bet code="Ftb_Mr3" name="Match Result" id="35410981">
+            <choice name="%1%" id="274179107" odd="1.35"/>
+            <choice name="Draw" id="274179108" odd="4.75"/>
+            <choice name="%2%" id="274179109" odd="8.00"/>
+          </bet>
+        </bets>
+      </match>
+    </event>
+  </sport>
+</sports>
