@@ -17,8 +17,31 @@ data XMLSports = XMLSports
 
 data XMLSport = XMLSport
   { sportName :: String
-  , matches :: M.Map Int XMLMatch
+  , events :: M.Map Int XMLEvent
   }
+
+instance HXT.XmlPickler XMLSport where
+  xpickle = xpSport
+
+xpSport :: HXT.PU XMLSport
+xpSport =
+  HXT.xpElem "sport" $
+  HXT.xpWrap (uncurry XMLSport, sportName &&& events) $
+  HXT.xpPair (HXT.xpAttr "name" HXT.xpPrim)
+             (xpMap "event")
+
+newtype XMLEvent = XMLEvent
+  { matches :: M.Map Int XMLMatch
+  }
+
+instance HXT.XmlPickler XMLEvent where
+  xpickle = xpEvent
+
+xpEvent :: HXT.PU XMLEvent
+xpEvent =
+  HXT.xpElem "event" $
+  HXT.xpWrap (XMLEvent, matches) $
+  xpMap "match"
 
 data XMLMatch = XMLMatch
   { startDate :: D.DateTime
