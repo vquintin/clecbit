@@ -22,8 +22,20 @@ data XMLSport = XMLSport
 data XMLMatch = XMLMatch
   { startDate :: D.DateTime
   , matchName :: String
-  , bets :: M.Map Int XMLBet
+  , bets :: XMLBets
   }
+
+newtype XMLBets = XMLBets
+  { betMap :: M.Map Int XMLBet
+  }
+
+instance HXT.XmlPickler XMLBets where
+  xpickle = xpBets
+
+xpBets :: HXT.PU XMLBets
+xpBets =
+  HXT.xpElem "bets" $
+  HXT.xpWrap (XMLBets, betMap) (xpMap "bet")
 
 data XMLBet = XMLBet
   { betCode :: String
