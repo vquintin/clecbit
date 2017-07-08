@@ -2,16 +2,16 @@ module Lib
     ( someFunc
     ) where
 import Control.Arrow ((&&&))
-import qualified Data.Dates as D (DateTime)
 import qualified Data.Ratio as R (Ratio)
 import qualified Data.Map as M
+import qualified Data.Time as T
 import qualified Text.XML.HXT.Core as HXT
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
 
 data XMLSports = XMLSports
-  { fileDate :: D.DateTime
+  { fileDate :: T.UTCTime
   , sports :: M.Map Int XMLSport
   }
 
@@ -22,7 +22,7 @@ xpSports :: HXT.PU XMLSports
 xpSports =
   HXT.xpElem "sports" $
   HXT.xpWrap (uncurry XMLSports, fileDate &&& sports) $
-  HXT.xpPair (HXT.xpAttr "sport" undefined)
+  HXT.xpPair (HXT.xpAttr "file_date" $ xpUTCTime wet "%FT%X%Q")
              (xpMap "sport")
 
 data XMLSport = XMLSport
@@ -54,7 +54,7 @@ xpEvent =
   xpMap "match"
 
 data XMLMatch = XMLMatch
-  { startDate :: D.DateTime
+  { startDate :: T.UTCTime
   , matchName :: String
   , bets :: XMLBets
   }
@@ -68,9 +68,21 @@ xpMatch =
   HXT.xpWrap ( HXT.uncurry3 XMLMatch
              , \t -> (startDate t, matchName t, bets t)
              ) $
-  HXT.xpTriple undefined
+  HXT.xpTriple (HXT.xpAttr "start_date" $ xpUTCTime wet "%FT%X")
                (HXT.xpAttr "name" HXT.xpText)
                HXT.xpickle
+
+wet :: T.TimeZone
+wet = T.TimeZone 60 True "WET"
+
+xpUTCTime :: T.TimeZone -> String -> HXT.PU T.UTCTime
+xpUTCTime timeZone format =
+  HXT.xpWrapMaybe ( stringToTime
+                  , timeToString
+                  ) HXT.xpText
+  where
+    stringToTime s = T.zonedTimeToUTC <$> (T.ZonedTime <$> T.parseTimeM False T.defaultTimeLocale format s <*> Just timeZone)
+    timeToString t = T.formatTime T.defaultTimeLocale format $ T.utcToZonedTime timeZone t
 
 newtype XMLBets = XMLBets
   { betMap :: M.Map Int XMLBet
