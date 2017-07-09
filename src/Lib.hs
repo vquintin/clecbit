@@ -116,7 +116,6 @@ instance HXT.XmlPickler XMLBet where
 
 xpBet :: HXT.PU XMLBet
 xpBet =
-  HXT.xpElem "bet" $
   HXT.xpWrap ( HXT.uncurry3 XMLBet
              , \t -> (betCode t, betName t, choices t)
              ) $
@@ -138,7 +137,6 @@ instance HXT.XmlPickler XMLChoice where
 
 xpChoice :: HXT.PU XMLChoice
 xpChoice =
-  HXT.xpElem "choice" $
   HXT.xpWrap ( uncurry XMLChoice, choiceName &&& choiceOdd) $
   HXT.xpPair (HXT.xpAttr "name" HXT.xpText)
              (HXT.xpAttr "odd"  HXT.xpPrim)

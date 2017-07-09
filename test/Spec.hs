@@ -10,6 +10,7 @@ main = showCounts <$> runTestTT tests >>= putStrLn
                          , testParsingEmptySport
                          , testParsingEmptyEvent
                          , testParsingEmptyBets
+                         , testParsingAll
                          ]
 
 
@@ -37,6 +38,21 @@ testParsingEmptyEvent = parsingTest "test/exampleEvent.xml" $
     )
 
 testParsingEmptyBets = parsingTest "test/exampleBets.xml" $
+  XMLSports
+    (parseTimeOrError False defaultTimeLocale "%FT%X%Q" "2017-07-07T20:55:17.403")
+    (Map.fromList
+      [ (1 , XMLSport "Football" $ Map.fromList
+        [ (3, XMLEvent "Eng. Premier League" $ Map.fromList
+          [ (1429761, XMLMatch (parseTimeOrError False defaultTimeLocale "%FT%X" "2017-08-11T18:45:00")
+                     "Arsenal - Leicester"
+                     (XMLBets Map.empty)
+            )
+          ])
+        ])
+      ]
+    )
+
+testParsingAll = parsingTest "test/example.xml" $
   XMLSports
     (parseTimeOrError False defaultTimeLocale "%FT%X%Q" "2017-07-07T20:55:17.403")
     (Map.fromList
