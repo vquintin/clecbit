@@ -2,6 +2,7 @@ module Lib
     ( someFunc
     , xpSports
     , XMLSports (..)
+    , XMLSport (..)
     ) where
 import Control.Arrow ((&&&))
 import qualified Data.Ratio as R (Ratio)
@@ -25,7 +26,7 @@ xpSports =
   HXT.xpElem "sports" $
   HXT.xpWrap (uncurry XMLSports, fileDate &&& sports) $
   HXT.xpPair (HXT.xpAttr "file_date" $ xpUTCTime wet "%FT%X%Q")
-             (xpMap "sport")
+             (HXT.xpMap "sport" "id" HXT.xpPrim xpSport)
 
 data XMLSport = XMLSport
   { sportName :: String
@@ -38,7 +39,7 @@ instance HXT.XmlPickler XMLSport where
 xpSport :: HXT.PU XMLSport
 xpSport =
   HXT.xpWrap (uncurry XMLSport, sportName &&& events) $
-  HXT.xpPair (HXT.xpAttr "name" HXT.xpPrim)
+  HXT.xpPair (HXT.xpTextAttr "name")
              (xpMap "event")
 
 newtype XMLEvent = XMLEvent
