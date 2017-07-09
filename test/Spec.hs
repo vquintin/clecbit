@@ -1,6 +1,8 @@
+import qualified Data.Map as Map
+import Data.Time
 import Test.HUnit
 import Text.XML.HXT.Core
-import Lib (xpSports)
+import Lib
 
 main :: IO ()
 main = putStrLn "Test suite not yet implemented"
@@ -14,4 +16,7 @@ testParsing = TestCase $
                  )
      assertEqual "The parsed file is not as expected" expected actual
   where
-    expected = undefined
+    expected =
+      XMLSports
+        (parseTimeOrError False defaultTimeLocale "%FT%X%Q" "2017-07-07T21:55:17.403")
+        Map.empty

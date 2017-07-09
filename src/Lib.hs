@@ -1,6 +1,7 @@
 module Lib
     ( someFunc
     , xpSports
+    , XMLSports (..)
     ) where
 import Control.Arrow ((&&&))
 import qualified Data.Ratio as R (Ratio)
