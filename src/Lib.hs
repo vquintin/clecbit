@@ -68,12 +68,11 @@ instance HXT.XmlPickler XMLMatch where
 
 xpMatch :: HXT.PU XMLMatch
 xpMatch =
-  HXT.xpElem "match" $
   HXT.xpWrap ( HXT.uncurry3 XMLMatch
              , \t -> (startDate t, matchName t, bets t)
              ) $
   HXT.xpTriple (HXT.xpAttr "start_date" $ xpUTCTime wet "%FT%X")
-               (HXT.xpAttr "name" HXT.xpText)
+               (HXT.xpTextAttr "name")
                HXT.xpickle
 
 wet :: T.TimeZone
