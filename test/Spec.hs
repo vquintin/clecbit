@@ -8,6 +8,7 @@ main :: IO ()
 main = showCounts <$> runTestTT tests >>= putStrLn
   where tests = TestList [ testParsingEmptySports
                          , testParsingEmptySport
+                         , testParsingEmptyEvent
                          ]
 
 
@@ -23,6 +24,17 @@ testParsingEmptySport = parsingTest "test/exampleSport.xml" $
       [ (1 , XMLSport "Football" Map.empty)
       ]
     )
+
+testParsingEmptyEvent = parsingTest "test/exampleEvent.xml" $
+  XMLSports
+    (parseTimeOrError False defaultTimeLocale "%FT%X%Q" "2017-07-07T20:55:17.403")
+    (Map.fromList
+      [ (1 , XMLSport "Football" $ Map.fromList
+        [ (3, XMLEvent "Eng. Premier League" Map.empty)
+        ])
+      ]
+    )
+
 
 parsingTest :: FilePath -> XMLSports -> Test
 parsingTest file expected = TestCase $

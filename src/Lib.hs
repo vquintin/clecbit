@@ -3,6 +3,7 @@ module Lib
     , xpSports
     , XMLSports (..)
     , XMLSport (..)
+    , XMLEvent (..)
     ) where
 import Control.Arrow ((&&&))
 import qualified Data.Ratio as R (Ratio)
@@ -26,7 +27,7 @@ xpSports =
   HXT.xpElem "sports" $
   HXT.xpWrap (uncurry XMLSports, fileDate &&& sports) $
   HXT.xpPair (HXT.xpAttr "file_date" $ xpUTCTime wet "%FT%X%Q")
-             (HXT.xpMap "sport" "id" HXT.xpPrim xpSport)
+             (xpMap "sport")
 
 data XMLSport = XMLSport
   { sportName :: String
@@ -42,8 +43,9 @@ xpSport =
   HXT.xpPair (HXT.xpTextAttr "name")
              (xpMap "event")
 
-newtype XMLEvent = XMLEvent
-  { matches :: M.Map Int XMLMatch
+data XMLEvent = XMLEvent
+  { eventName :: String
+  , matches :: M.Map Int XMLMatch
   } deriving (Eq, Show)
 
 instance HXT.XmlPickler XMLEvent where
@@ -51,8 +53,9 @@ instance HXT.XmlPickler XMLEvent where
 
 xpEvent :: HXT.PU XMLEvent
 xpEvent =
-  HXT.xpWrap (XMLEvent, matches) $
-  xpMap "match"
+  HXT.xpWrap (uncurry XMLEvent, eventName &&& matches) $
+  HXT.xpPair (HXT.xpTextAttr "name")
+             (xpMap "match")
 
 data XMLMatch = XMLMatch
   { startDate :: T.UTCTime
@@ -118,11 +121,7 @@ xpBet =
 
 
 xpMap :: (HXT.XmlPickler a) => String -> HXT.PU (M.Map Int a)
-xpMap tag =
-  HXT.xpWrap (M.fromList, M.toList) $
-  HXT.xpList $
-  HXT.xpElem tag $
-  HXT.xpPair ( HXT.xpAttr "id" HXT.xpPrim) HXT.xpickle
+xpMap tag = HXT.xpMap tag "id" HXT.xpPrim HXT.xpickle
 
 data XMLChoice = XMLChoice
   { choiceName :: String
