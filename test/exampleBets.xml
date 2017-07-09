@@ -1,0 +1,10 @@
+<sports file_date="2017-07-07T21:55:17.403">
+  <sport name="Football" id="1">
+    <event name="Eng. Premier League" id="3">
+      <match name="Arsenal - Leicester" id="1429761" start_date="2017-08-11T19:45:00" live_id="" streaming="0">
+        <bets>
+        </bets>
+      </match>
+    </event>
+  </sport>
+</sports>

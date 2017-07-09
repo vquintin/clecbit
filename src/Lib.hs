@@ -4,6 +4,8 @@ module Lib
     , XMLSports (..)
     , XMLSport (..)
     , XMLEvent (..)
+    , XMLMatch (..)
+    , XMLBets (..)
     ) where
 import Control.Arrow ((&&&))
 import qualified Data.Ratio as R (Ratio)
@@ -68,12 +70,16 @@ instance HXT.XmlPickler XMLMatch where
 
 xpMatch :: HXT.PU XMLMatch
 xpMatch =
+  HXT.xpFilterAttr (HXT.hasName "name" HXT.<+> HXT.hasName "start_date") $
   HXT.xpWrap ( HXT.uncurry3 XMLMatch
-             , \t -> (startDate t, matchName t, bets t)
+             , \t -> ( startDate t
+                     , matchName t
+                     ,bets t)
              ) $
   HXT.xpTriple (HXT.xpAttr "start_date" $ xpUTCTime wet "%FT%X")
                (HXT.xpTextAttr "name")
                HXT.xpickle
+  where maybeToInt m = if (m == Nothing) then 0 else 1
 
 wet :: T.TimeZone
 wet = T.TimeZone 60 True "WET"
