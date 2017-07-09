@@ -6,6 +6,8 @@ module Lib
     , XMLEvent (..)
     , XMLMatch (..)
     , XMLBets (..)
+    , XMLBet (..)
+    , XMLChoice (..)
     ) where
 import Control.Arrow ((&&&))
 import qualified Data.Ratio as R (Ratio)

@@ -60,7 +60,13 @@ testParsingAll = parsingTest "test/example.xml" $
         [ (3, XMLEvent "Eng. Premier League" $ Map.fromList
           [ (1429761, XMLMatch (parseTimeOrError False defaultTimeLocale "%FT%X" "2017-08-11T18:45:00")
                      "Arsenal - Leicester"
-                     (XMLBets Map.empty)
+                     (XMLBets $ Map.fromList
+                       [ (35410981, XMLBet "Ftb_Mr3" "Match Result" $ Map.fromList
+                         [ (274179107, XMLChoice "%1%" 1.35)
+                         , (274179108, XMLChoice "Draw" 4.75)
+                         , (274179109, XMLChoice "%2%" 8.0)
+                         ])
+                       ])
             )
           ])
         ])
