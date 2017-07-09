@@ -37,7 +37,6 @@ instance HXT.XmlPickler XMLSport where
 
 xpSport :: HXT.PU XMLSport
 xpSport =
-  HXT.xpElem "sport" $
   HXT.xpWrap (uncurry XMLSport, sportName &&& events) $
   HXT.xpPair (HXT.xpAttr "name" HXT.xpPrim)
              (xpMap "event")
@@ -51,7 +50,6 @@ instance HXT.XmlPickler XMLEvent where
 
 xpEvent :: HXT.PU XMLEvent
 xpEvent =
-  HXT.xpElem "event" $
   HXT.xpWrap (XMLEvent, matches) $
   xpMap "match"
 

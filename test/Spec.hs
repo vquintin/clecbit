@@ -5,18 +5,20 @@ import Text.XML.HXT.Core
 import Lib
 
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = showCounts <$> runTestTT tests >>= putStrLn
+  where tests = TestList [testParsingEmptySports]
 
 
-testParsing = TestCase $
+testParsingEmptySports= TestCase $
   do [actual] <- runX
                  ( xunpickleDocument xpSports
                       [ withValidate no
-                      ] "example.xml"
+                      , withRemoveWS yes
+                      ] "test/exampleSports.xml"
                  )
      assertEqual "The parsed file is not as expected" expected actual
   where
     expected =
       XMLSports
-        (parseTimeOrError False defaultTimeLocale "%FT%X%Q" "2017-07-07T21:55:17.403")
+        (parseTimeOrError False defaultTimeLocale "%FT%X%Q" "2017-07-07T20:55:17.403")
         Map.empty
