@@ -1,5 +1,5 @@
 module Lib
-    ( someFunc
+    ( getSports
     , xpSports
     , XMLSports (..)
     , XMLSport (..)
@@ -13,10 +13,25 @@ import Control.Arrow ((&&&))
 import qualified Data.Ratio as R (Ratio)
 import qualified Data.Map as M
 import qualified Data.Time as T
+import qualified Network.HTTP as H
 import qualified Text.XML.HXT.Core as HXT
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+getSports :: IO XMLSports
+getSports = getRawXML >>= stringToXML
+
+stringToXML :: String -> IO XMLSports
+stringToXML s =
+  do let nobom = drop 3 s
+     [doc] <- HXT.runX (HXT.readString conf nobom HXT.>>> HXT.xunpickleVal xpSports)
+     return doc
+  where conf = [ HXT.withValidate HXT.no
+               , HXT.withRemoveWS HXT.yes
+               , HXT.withInputEncoding HXT.utf8
+               ]
+
+getRawXML :: IO String
+getRawXML = H.simpleHTTP (H.getRequest "http://xml.cdn.betclic.com/odds_en.xml")
+            >>= H.getResponseBody
 
 data XMLSports = XMLSports
   { fileDate :: T.UTCTime
