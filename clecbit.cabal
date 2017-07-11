@@ -2,12 +2,12 @@ name:                clecbit
 version:             0.2.0.0
 -- synopsis:
 -- description:
-homepage:            https://github.com/githubuser/clecbit#readme
+homepage:            https://github.com/vquintin/clecbit#readme
 license:             BSD3
 license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2017 Author name here
+author:              Virgile Quintin
+maintainer:          virgile.quintin@gmail.com
+copyright:           2017 Virgile Quintin
 category:            Web
 build-type:          Simple
 extra-source-files:  README.md
@@ -46,4 +46,4 @@ test-suite clecbit-test
 
 source-repository head
   type:     git
-  location: https://github.com/githubuser/clecbit
+  location: https://github.com/vquintin/clecbit
