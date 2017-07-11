@@ -2,7 +2,7 @@ import qualified Data.Map as Map
 import Data.Time
 import Test.HUnit
 import Text.XML.HXT.Core
-import Lib
+import ClecBit.XML
 
 main :: IO ()
 main = showCounts <$> runTestTT tests >>= putStrLn
@@ -15,37 +15,37 @@ main = showCounts <$> runTestTT tests >>= putStrLn
 
 
 testParsingEmptySports = parsingTest "test/exampleSports.xml" $
-  XMLSports
+  Sports
     (parseTimeOrError False defaultTimeLocale "%FT%X%Q" "2017-07-07T20:55:17.403")
     Map.empty
 
 testParsingEmptySport = parsingTest "test/exampleSport.xml" $
-  XMLSports
+  Sports
     (parseTimeOrError False defaultTimeLocale "%FT%X%Q" "2017-07-07T20:55:17.403")
     (Map.fromList
-      [ (1 , XMLSport "Football" Map.empty)
+      [ (1 , Sport "Football" Map.empty)
       ]
     )
 
 testParsingEmptyEvent = parsingTest "test/exampleEvent.xml" $
-  XMLSports
+  Sports
     (parseTimeOrError False defaultTimeLocale "%FT%X%Q" "2017-07-07T20:55:17.403")
     (Map.fromList
-      [ (1 , XMLSport "Football" $ Map.fromList
-        [ (3, XMLEvent "Eng. Premier League" Map.empty)
+      [ (1 , Sport "Football" $ Map.fromList
+        [ (3, Event "Eng. Premier League" Map.empty)
         ])
       ]
     )
 
 testParsingEmptyBets = parsingTest "test/exampleBets.xml" $
-  XMLSports
+  Sports
     (parseTimeOrError False defaultTimeLocale "%FT%X%Q" "2017-07-07T20:55:17.403")
     (Map.fromList
-      [ (1 , XMLSport "Football" $ Map.fromList
-        [ (3, XMLEvent "Eng. Premier League" $ Map.fromList
-          [ (1429761, XMLMatch (parseTimeOrError False defaultTimeLocale "%FT%X" "2017-08-11T18:45:00")
+      [ (1 , Sport "Football" $ Map.fromList
+        [ (3, Event "Eng. Premier League" $ Map.fromList
+          [ (1429761, Match (parseTimeOrError False defaultTimeLocale "%FT%X" "2017-08-11T18:45:00")
                      "Arsenal - Leicester"
-                     (XMLBets Map.empty)
+                     (Bets Map.empty)
             )
           ])
         ])
@@ -53,18 +53,18 @@ testParsingEmptyBets = parsingTest "test/exampleBets.xml" $
     )
 
 testParsingAll = parsingTest "test/example.xml" $
-  XMLSports
+  Sports
     (parseTimeOrError False defaultTimeLocale "%FT%X%Q" "2017-07-07T20:55:17.403")
     (Map.fromList
-      [ (1 , XMLSport "Football" $ Map.fromList
-        [ (3, XMLEvent "Eng. Premier League" $ Map.fromList
-          [ (1429761, XMLMatch (parseTimeOrError False defaultTimeLocale "%FT%X" "2017-08-11T18:45:00")
+      [ (1 , Sport "Football" $ Map.fromList
+        [ (3, Event "Eng. Premier League" $ Map.fromList
+          [ (1429761, Match (parseTimeOrError False defaultTimeLocale "%FT%X" "2017-08-11T18:45:00")
                      "Arsenal - Leicester"
-                     (XMLBets $ Map.fromList
-                       [ (35410981, XMLBet "Ftb_Mr3" "Match Result" $ Map.fromList
-                         [ (274179107, XMLChoice "%1%" 1.35)
-                         , (274179108, XMLChoice "Draw" 4.75)
-                         , (274179109, XMLChoice "%2%" 8.0)
+                     (Bets $ Map.fromList
+                       [ (35410981, Bet "Ftb_Mr3" "Match Result" $ Map.fromList
+                         [ (274179107, Choice "%1%" 1.35)
+                         , (274179108, Choice "Draw" 4.75)
+                         , (274179109, Choice "%2%" 8.0)
                          ])
                        ])
             )
@@ -73,7 +73,7 @@ testParsingAll = parsingTest "test/example.xml" $
       ]
     )
 
-parsingTest :: FilePath -> XMLSports -> Test
+parsingTest :: FilePath -> Sports -> Test
 parsingTest file expected = TestCase $
   do [actual] <- runX
                  ( xunpickleDocument xpSports

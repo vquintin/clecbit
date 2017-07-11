@@ -1,13 +1,13 @@
-module Lib
+module ClecBit.XML
     ( getSports
     , xpSports
-    , XMLSports (..)
-    , XMLSport (..)
-    , XMLEvent (..)
-    , XMLMatch (..)
-    , XMLBets (..)
-    , XMLBet (..)
-    , XMLChoice (..)
+    , Sports (..)
+    , Sport (..)
+    , Event (..)
+    , Match (..)
+    , Bets (..)
+    , Bet (..)
+    , Choice (..)
     ) where
 import Control.Arrow ((&&&))
 import qualified Data.Ratio as R (Ratio)
@@ -16,10 +16,10 @@ import qualified Data.Time as T
 import qualified Network.HTTP as H
 import qualified Text.XML.HXT.Core as HXT
 
-getSports :: IO XMLSports
+getSports :: IO Sports
 getSports = getRawXML >>= stringToXML
 
-stringToXML :: String -> IO XMLSports
+stringToXML :: String -> IO Sports
 stringToXML s =
   do let nobom = drop 3 s
      [doc] <- HXT.runX (HXT.readString conf nobom HXT.>>> HXT.xunpickleVal xpSports)
@@ -33,62 +33,62 @@ getRawXML :: IO String
 getRawXML = H.simpleHTTP (H.getRequest "http://xml.cdn.betclic.com/odds_en.xml")
             >>= H.getResponseBody
 
-data XMLSports = XMLSports
+data Sports = Sports
   { fileDate :: T.UTCTime
-  , sports :: M.Map Int XMLSport
+  , sports :: M.Map Int Sport
   } deriving (Eq, Show)
 
-instance HXT.XmlPickler XMLSports where
+instance HXT.XmlPickler Sports where
   xpickle = xpSports
 
-xpSports :: HXT.PU XMLSports
+xpSports :: HXT.PU Sports
 xpSports =
   HXT.xpElem "sports" $
-  HXT.xpWrap (uncurry XMLSports, fileDate &&& sports) $
+  HXT.xpWrap (uncurry Sports, fileDate &&& sports) $
   HXT.xpPair (HXT.xpAttr "file_date" $ xpUTCTime wet "%FT%X%Q")
              (xpMap "sport")
 
-data XMLSport = XMLSport
+data Sport = Sport
   { sportName :: String
-  , events :: M.Map Int XMLEvent
+  , events :: M.Map Int Event
   } deriving (Eq, Show)
 
-instance HXT.XmlPickler XMLSport where
+instance HXT.XmlPickler Sport where
   xpickle = xpSport
 
-xpSport :: HXT.PU XMLSport
+xpSport :: HXT.PU Sport
 xpSport =
-  HXT.xpWrap (uncurry XMLSport, sportName &&& events) $
+  HXT.xpWrap (uncurry Sport, sportName &&& events) $
   HXT.xpPair (HXT.xpTextAttr "name")
              (xpMap "event")
 
-data XMLEvent = XMLEvent
+data Event = Event
   { eventName :: String
-  , matches :: M.Map Int XMLMatch
+  , matches :: M.Map Int Match
   } deriving (Eq, Show)
 
-instance HXT.XmlPickler XMLEvent where
+instance HXT.XmlPickler Event where
   xpickle = xpEvent
 
-xpEvent :: HXT.PU XMLEvent
+xpEvent :: HXT.PU Event
 xpEvent =
-  HXT.xpWrap (uncurry XMLEvent, eventName &&& matches) $
+  HXT.xpWrap (uncurry Event, eventName &&& matches) $
   HXT.xpPair (HXT.xpTextAttr "name")
              (xpMap "match")
 
-data XMLMatch = XMLMatch
+data Match = Match
   { startDate :: T.UTCTime
   , matchName :: String
-  , bets :: XMLBets
+  , bets :: Bets
   } deriving (Eq, Show)
 
-instance HXT.XmlPickler XMLMatch where
+instance HXT.XmlPickler Match where
   xpickle = xpMatch
 
-xpMatch :: HXT.PU XMLMatch
+xpMatch :: HXT.PU Match
 xpMatch =
   HXT.xpFilterAttr (HXT.hasName "name" HXT.<+> HXT.hasName "start_date") $
-  HXT.xpWrap ( HXT.uncurry3 XMLMatch
+  HXT.xpWrap ( HXT.uncurry3 Match
              , \t -> ( startDate t
                      , matchName t
                      ,bets t)
@@ -110,30 +110,30 @@ xpUTCTime timeZone format =
     stringToTime s = T.zonedTimeToUTC <$> (T.ZonedTime <$> T.parseTimeM False T.defaultTimeLocale format s <*> Just timeZone)
     timeToString t = T.formatTime T.defaultTimeLocale format $ T.utcToZonedTime timeZone t
 
-newtype XMLBets = XMLBets
-  { betMap :: M.Map Int XMLBet
+newtype Bets = Bets
+  { betMap :: M.Map Int Bet
   } deriving (Eq, Show)
 
-instance HXT.XmlPickler XMLBets where
+instance HXT.XmlPickler Bets where
   xpickle = xpBets
 
-xpBets :: HXT.PU XMLBets
+xpBets :: HXT.PU Bets
 xpBets =
   HXT.xpElem "bets" $
-  HXT.xpWrap (XMLBets, betMap) (xpMap "bet")
+  HXT.xpWrap (Bets, betMap) (xpMap "bet")
 
-data XMLBet = XMLBet
+data Bet = Bet
   { betCode :: String
   , betName :: String
-  , choices :: M.Map Int XMLChoice
+  , choices :: M.Map Int Choice
   } deriving (Eq, Show)
 
-instance HXT.XmlPickler XMLBet where
+instance HXT.XmlPickler Bet where
   xpickle = xpBet
 
-xpBet :: HXT.PU XMLBet
+xpBet :: HXT.PU Bet
 xpBet =
-  HXT.xpWrap ( HXT.uncurry3 XMLBet
+  HXT.xpWrap ( HXT.uncurry3 Bet
              , \t -> (betCode t, betName t, choices t)
              ) $
   HXT.xpTriple (HXT.xpAttr "code" HXT.xpText)
@@ -144,16 +144,16 @@ xpBet =
 xpMap :: (HXT.XmlPickler a) => String -> HXT.PU (M.Map Int a)
 xpMap tag = HXT.xpMap tag "id" HXT.xpPrim HXT.xpickle
 
-data XMLChoice = XMLChoice
+data Choice = Choice
   { choiceName :: String
   , choiceOdd :: Double
   } deriving (Eq, Show)
 
-instance HXT.XmlPickler XMLChoice where
+instance HXT.XmlPickler Choice where
   xpickle = xpChoice
 
-xpChoice :: HXT.PU XMLChoice
+xpChoice :: HXT.PU Choice
 xpChoice =
-  HXT.xpWrap ( uncurry XMLChoice, choiceName &&& choiceOdd) $
+  HXT.xpWrap ( uncurry Choice, choiceName &&& choiceOdd) $
   HXT.xpPair (HXT.xpAttr "name" HXT.xpText)
              (HXT.xpAttr "odd"  HXT.xpPrim)

@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import ClecBit.XML
 
 main :: IO ()
 main = getSports >>= print
