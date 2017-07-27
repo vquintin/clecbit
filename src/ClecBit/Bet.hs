@@ -13,6 +13,7 @@ import qualified HBet.Football as FB
 data BetSum
   = FootballFullTime (FB.FootballBetInfo FB.FootballFullTime)
   | FootballHalfTime (FB.FootballBetInfo FB.FootballHalfTime)
+  | FootballHalfFullTime (FB.FootballBetInfo FB.FootballHalfFullTime)
   deriving (Show)
 
 toBetSum :: Sports -> [BetSum]
@@ -38,6 +39,8 @@ footBallToBetSum sport = do
   where
     getEvent "World Cup" = [FB.WorldCup]
     getEvent "Eng. Premier League" = [FB.PremierLeague]
+    getEvent "French Ligue 1" = [FB.Ligue1]
+    getEvent "Spanish Liga Primera" = [FB.LigaPrimera]
     getEvent _ = []
     getTeams s =
       case SP.splitOn " - " s of
@@ -49,13 +52,45 @@ footballBetToBetSum match bet =
   case betCode bet of
     "Ftb_Mr3" ->
       return $
-      FootballFullTime $ FB.FootballBetInfo match (betToFootballFullTime bet)
+      FootballFullTime $
+      FB.FootballBetInfo match (betToHbet strToFootballFullTime bet)
+    "Ftb_Htr" ->
+      return $
+      FootballHalfTime $
+      FB.FootballBetInfo match (betToHbet strToFootballHalfTime bet)
+    "Ftb_Htf" ->
+      return $
+      FootballHalfFullTime $
+      FB.FootballBetInfo match (betToHbet strToFootballHalfFullTime bet)
     _ -> []
 
-betToFootballFullTime :: Bet -> [HB.Choice FB.FootballFullTime]
-betToFootballFullTime bet = (snd <$> (M.toList . choices) bet) >>= go
+betToHbet :: (String -> [a]) -> Bet -> [HB.Choice a]
+betToHbet fa bet = do
+  (choiceID, choice) <- (M.toList . choices) bet
+  betType <- fa $ choiceName choice
+  let odd = choiceOdd choice
+  return $ HB.Choice betType odd
+
+strToFootballFullTime :: String -> [FB.FootballFullTime]
+strToFootballFullTime "%1%" = return FB.FT1
+strToFootballFullTime "Draw" = return FB.FTDraw
+strToFootballFullTime "%2%" = return FB.FT2
+strToFootballFullTime _ = MO.mzero
+
+strToFootballHalfTime :: String -> [FB.FootballHalfTime]
+strToFootballHalfTime "%1%" = return FB.HT1
+strToFootballHalfTime "Draw" = return FB.HTDraw
+strToFootballHalfTime "%2%" = return FB.HT2
+strToFootballHalfTime _ = MO.mzero
+
+strToFootballHalfFullTime :: String -> [FB.FootballHalfFullTime]
+strToFootballHalfFullTime s = do
+  (htStr, ftStr) <- splitResult s
+  ht <- strToFootballHalfTime htStr
+  ft <- strToFootballFullTime ftStr
+  return $ FB.FootballHalfFullTime (ht, ft)
   where
-    go (Choice "%1%" odd) = [HB.Choice FB.FT1 odd]
-    go (Choice "Draw" odd) = [HB.Choice FB.FT1 odd]
-    go (Choice "%2%" odd) = [HB.Choice FB.FT1 odd]
-    go _ = []
+    splitResult s =
+      case SP.splitOn " / " s of
+        [a, b] -> [(a, b)]
+        _ -> []
