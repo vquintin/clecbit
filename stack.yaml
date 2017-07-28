@@ -40,6 +40,7 @@ packages:
 - location:
     git: git@github.com:vquintin/hbet.git
     commit: 29bf2c86f5fa62dc03e5c3f88b0b058b88f6f660
+  extra-dep: true
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps: [ HTTP-4000.3.7
