@@ -7,13 +7,16 @@ import ClecBit.XML
 import qualified Control.Monad as MO
 import qualified Data.List.Split as SP
 import qualified Data.Map as M
+import qualified Data.Maybe as MY
 import qualified HBet.Bet as HB
 import qualified HBet.Football as FB
+import qualified Text.Read as T
 
 data BetSum
   = FootballFullTime (FB.FootballBetInfo FB.FootballFullTime)
   | FootballHalfTime (FB.FootballBetInfo FB.FootballHalfTime)
   | FootballHalfFullTime (FB.FootballBetInfo FB.FootballHalfFullTime)
+  | FootballCorrectScore (FB.FootballBetInfo FB.FootballCorrectScore)
   deriving (Show)
 
 toBetSum :: Sports -> [BetSum]
@@ -40,6 +43,7 @@ footBallToBetSum sport = do
     getEvent "World Cup" = [FB.WorldCup]
     getEvent "Eng. Premier League" = [FB.PremierLeague]
     getEvent "French Ligue 1" = [FB.Ligue1]
+    getEvent "German Bundesliga" = [FB.Bundesliga]
     getEvent "Spanish Liga Primera" = [FB.LigaPrimera]
     getEvent _ = []
     getTeams s =
@@ -62,6 +66,10 @@ footballBetToBetSum match bet =
       return $
       FootballHalfFullTime $
       FB.FootballBetInfo match (betToHbet strToFootballHalfFullTime bet)
+    "Ftb_Csc" ->
+      return $
+      FootballCorrectScore $
+      FB.FootballBetInfo match (betToHbet strToFootballCorrectScore bet)
     _ -> []
 
 betToHbet :: (String -> [a]) -> Bet -> [HB.Choice a]
@@ -71,13 +79,13 @@ betToHbet fa bet = do
   let odd = choiceOdd choice
   return $ HB.Choice betType odd
 
-strToFootballFullTime :: String -> [FB.FootballFullTime]
+strToFootballFullTime :: (MO.MonadPlus m) => String -> m FB.FootballFullTime
 strToFootballFullTime "%1%" = return FB.FT1
 strToFootballFullTime "Draw" = return FB.FTDraw
 strToFootballFullTime "%2%" = return FB.FT2
 strToFootballFullTime _ = MO.mzero
 
-strToFootballHalfTime :: String -> [FB.FootballHalfTime]
+strToFootballHalfTime :: (MO.MonadPlus m) => String -> m FB.FootballHalfTime
 strToFootballHalfTime "%1%" = return FB.HT1
 strToFootballHalfTime "Draw" = return FB.HTDraw
 strToFootballHalfTime "%2%" = return FB.HT2
@@ -92,5 +100,17 @@ strToFootballHalfFullTime s = do
   where
     splitResult s =
       case SP.splitOn " / " s of
+        [a, b] -> [(a, b)]
+        _ -> []
+
+strToFootballCorrectScore :: String -> [FB.FootballCorrectScore]
+strToFootballCorrectScore s = do
+  (sc1Str, sc2Str) <- splitResult s
+  sc1 <- (MY.maybeToList . T.readMaybe) sc1Str
+  sc2 <- (MY.maybeToList . T.readMaybe) sc2Str
+  return $ FB.FootballCorrectScore sc1 sc2
+  where
+    splitResult s =
+      case SP.splitOn " - " s of
         [a, b] -> [(a, b)]
         _ -> []
