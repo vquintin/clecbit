@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module ClecBit.XML
   ( getSports
   , xpSports
@@ -11,15 +13,17 @@ module ClecBit.XML
   ) where
 
 import Control.Arrow ((&&&))
+import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString.Lazy.Char8 as C8
 import qualified Data.Map as M
 import Data.Maybe (isNothing)
 import qualified Data.Ratio as R (Ratio)
 import qualified Data.Time as T
-import qualified Network.HTTP as H
+import qualified Network.HTTP.Simple as H
 import qualified Text.XML.HXT.Core as HXT
 
 getSports :: IO Sports
-getSports = getRawXML >>= stringToXML
+getSports = getRawXML >>= (stringToXML . C8.unpack)
 
 stringToXML :: String -> IO Sports
 stringToXML s = do
@@ -34,10 +38,10 @@ stringToXML s = do
       , HXT.withInputEncoding HXT.utf8
       ]
 
-getRawXML :: IO String
-getRawXML =
-  H.simpleHTTP (H.getRequest "http://xml.cdn.betclic.com/odds_en.xml") >>=
-  H.getResponseBody
+getRawXML :: IO BL.ByteString
+getRawXML = H.getResponseBody <$> getResp
+  where
+    getResp = H.httpLBS "http://xml.cdn.betclic.com/odds_en.xml"
 
 data Sports = Sports
   { fileDate :: T.UTCTime
