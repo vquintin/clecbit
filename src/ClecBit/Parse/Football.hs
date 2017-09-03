@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module ClecBit.Parse.Football
   (
@@ -6,22 +7,10 @@ module ClecBit.Parse.Football
 
 import ClecBit.Parse.Parsable
 import qualified Data.Map as M
-import Data.Text (Text)
+import Data.Text (Text, splitOn)
 import qualified HBet.Bet as HB
 import qualified HBet.Football as FB
-import qualified HBet.Type as TY
-
-parseFootball :: Event -> [Either String (HB.Choice FB.Football ())]
-parseFootball ev = do
-  let competition = parseData $ eventName ev
-  (_, match) <- M.toList $ matches ev
-  let lineup = parseData $ matchName match
-  (_, bet) <- M.toList $ (betMap . bets) match
-  (_, choice) <- M.toList $ choices bet
-  let betType = parseData (betCode bet, choiceName choice)
-  return $
-    HB.Choice <$> pure () <*> (HB.Match <$> competition <*> lineup) <*> betType <*>
-    pure (choiceOdd choice)
+import qualified HBet.Types as TY
 
 instance Parsable Text (HB.Competition FB.Football) where
   parseData t =
@@ -29,20 +18,20 @@ instance Parsable Text (HB.Competition FB.Football) where
       "Eng. Premier League" -> Right $ FB.ChD1 TY.England
       "French Ligue 1" -> Right $ FB.ChD1 TY.France
       "German Bundesliga" -> Right $ FB.ChD1 TY.Germany
-      "Italian Serie A" -> Right $ FB.ChD1 TY.Italy
+      "Italian Serie A" -> Right $ FB.ChD1 TY.Italia
       "Spanish Liga Primera" -> Right $ FB.ChD1 TY.Spain
       "French Ligue 2" -> Right $ FB.ChD2 TY.France
       "Belgian First Division A" -> Right $ FB.ChD1 TY.Belgium
       "English Championship" -> Right $ FB.ChD2 TY.England
       "German Bundesliga 2" -> Right $ FB.ChD2 TY.Germany
-      "Italian Serie B" -> Right $ FB.ChD2 TY.Italy
+      "Italian Serie B" -> Right $ FB.ChD2 TY.Italia
       "Brazilian Serie A" -> Right $ FB.ChD1 TY.Brasil
       _ -> Left $ "Unknown competition: " ++ show t
 
-instance Parsable Text (HB.Lineup FB.Football) where
+instance Parsable Text (FB.Lineup FB.Football) where
   parseData t =
     case splitOn " - " t of
-      [a, b] -> return $ Lineup a b
+      [a, b] -> return $ FB.Lineup a b
       _ -> Left $ "Can't parse lineup: " ++ show t
 
 instance Parsable (Text, Text) (HB.BetType FB.Football) where

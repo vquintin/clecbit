@@ -16,7 +16,7 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     ClecBit.XML
-                     , ClecBit.Bet
+                     , ClecBit.Parse
   other-modules:       ClecBit.Parse.Football
                      , ClecBit.Parse.Parsable
   build-depends:       base >= 4.7 && < 5
