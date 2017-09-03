@@ -33,6 +33,6 @@ instance Parsable Text TY.WinOrDraw where
   parseData t =
     case t of
       "%1%" -> return TY.W1
-      "%N%" -> return TY.Draw
+      "Draw" -> return TY.Draw
       "%2%" -> return TY.W2
       _ -> Left $ "Unknown win or draw: " ++ show t

@@ -51,3 +51,4 @@ instance Parsable (Text, Text) (HB.BetType FB.Football) where
         case splitOn " / " choice of
           [a, b] -> FB.HTFTWinOrDraw <$> parseData a <*> parseData b
           _ -> Left $ "Can't parse HT/FT: " ++ show choice
+      _ -> Left $ "Unknown bet type: " ++ show bet
