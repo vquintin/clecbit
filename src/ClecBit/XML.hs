@@ -41,7 +41,7 @@ textToXML t = do
       ]
 
 getRawXML :: IO Text
-getRawXML = (toStrict . decodeUtf8 . H.getResponseBody) <$> getResp
+getRawXML = (toStrict . decodeUtf8 . BL.drop 3 . H.getResponseBody) <$> getResp
   where
     getResp = H.httpLBS "http://xml.cdn.betclic.com/odds_en.xml"
 
